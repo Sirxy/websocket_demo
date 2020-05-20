@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> WebSocket ChatRoom </title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        .box{
+            width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 25px;
+        }
+        #text{
+            width: 685px;
+            height: 130px;
+            border: 1px solid skyblue;
+            border-radius: 10px;
+            font-size: 20px;
+            text-indent: 1em;
+            resize:none;
+            outline: none;
+        }
+        #text::placeholder{
+            color: skyblue;
+        }
+        .btn{
+            width: 100px;
+            margin: -27px 0 0px 8px;
+        }
+        #messages{
+            padding-left: 10px;
+            font-size: 25px;
+        }
+        #messages li{
+            list-style: none;
+            color: #000;
+            line-height: 30px;
+            font-size: 18px;
+
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div>
+            <textarea id="text" placeholder="请输入您的内容"></textarea>
+            <a href="javascript:WebSocketSend();" class="btn btn-primary">发送</a>
+        </div>
+        <ul id="messages">
+        </ul>
+    </div>
+
+    <script type="text/javascript">
+        var mes = document.getElementById('messages');
+
+        if('WebSocket' in window){  /*判断浏览器是否支持WebSocket接口*/
+            /*创建创建 WebSocket 对象，协议本身使用新的ws://URL格式*/
+            var Socket = new WebSocket("ws://192.168.3.40:2222/chat")
+            /*连接建立时触发*/
+            Socket.onopen = function () {
+                mes.innerHTML += "<br>连接已建立！╰(￣▽￣)╮";
+                //alert("连接已建立，可以进行通信")
+            };
+            /*客户端接收服务端数据时触发*/
+            Socket.onmessage = function (ev) {
+                var received_msg = ev.data; /*接受消息*/
+                var aLi = "<li>" + received_msg + "</li>";
+                mes.innerHTML += aLi;
+
+                var au = '<embed src="/static/提示.wav" loop="0" autostart="true" hidden="true"></embed>'
+                mes.innerHTML += au;
+
+
+
+                /*jq方式*/
+                // $(mes).append($(aLi));
+            };
+            /*连接关闭时触发*/
+            Socket.onclose = function () {
+                mes.innerHTML += "<br>连接已经关闭...(┬＿┬)";
+            };
+        }else{
+            /*浏览器不支持 WebSocket*/
+            alert("您的浏览器不支持 WebSocket!");
+        }
+        function WebSocketSend() {
+            /*form 里的Dom元素(input select checkbox textarea radio)都是value*/
+            var send_msg = document.getElementById('text').value;
+            //或者JQ中获取
+            // var send_msg = $("#text").val();
+            /*使用连接发送消息*/
+            Socket.send(send_msg);
+        }
+    </script>
+</body>
+</html>
